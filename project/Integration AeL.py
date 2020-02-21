@@ -126,10 +126,15 @@ def g(x1):
             part2 = a1*(z[i+1]-z[i])
             part3 = a2*(z[i+1]**2-z[i]**2)
             part4 = a3*(z[i+1]**2-z[i]**2)
+           
             
+            G = part1 + (x1)*part2 + part3 + (x1)*part4
+            integrsmall.append(G)
+            
+            
+           
             if choice == 1:
-                G = part1 + (x1)*part2 + part3 + (x1)*part4
-                integrsmall.append(G)
+                print(" G")
                 #Integrated function of aerodynamic loading, wrt z                
             elif choice == 2:
                 G = part1*x1 + 0.5*part2*(x1**2) + part3*x1 + 0.5*part4*(x1**2)
@@ -154,13 +159,14 @@ def g(x1):
             if dothing == True:
                 dothing = False
         integrsmall = np.array(integrsmall)
+        resultants_z_per_square = integrsmall
         integrsmall = np.sum(integrsmall) #summing the parts in the z direction to gain the force for a coordinate x
         
         integr.append(integrsmall)
        
     integr = np.array(integr, dtype = 'f8') #array containing integrated functions to get g(x)
     
-    return integr
+    return integr, resultants_z_per_square
 
 def cg(x2):
     intcg = []
@@ -206,7 +212,7 @@ for i in range(len(x)-1):
     if float(value) > float(x[i]):       #determining in which part of the aileron we are and which g(x) to use
         pass
     else:
-        t = g(value)
+        t, resultants_z_per_square = g(value)
         finalg = t[i]
         print(finalg)                   #magintude of aerodynamic load on chord length for any x
 #        break
@@ -222,7 +228,9 @@ testJorn = []
 for i in range(len(z)-1):
     welp = (z[i+1] + z[i])/2
     testJorn.append(welp)
-print(testJorn)
+    np.array(testJorn)
+   
+zloc_resultantforce_perx = sum(testJorn*resultants_z_per_square)/sum(resultants_z_per_square)
 
 
 """ Creating test for the intergration function, by using array of ones"""
