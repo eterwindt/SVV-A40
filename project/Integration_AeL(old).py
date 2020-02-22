@@ -116,6 +116,7 @@ def g(x1):
     for j in range(len(x)-1):
         dothing = True
         integrsmall = []
+        integrcg = []
         for i in range(len(z)-1):
             a0 = float(coefarray[i,j,0])
             a1 = float(coefarray[i,j,1])
@@ -128,13 +129,12 @@ def g(x1):
             part4 = a3*(z[i+1]**2-z[i]**2)
            
             
-            G = part1 + (x1)*part2 + part3 + (x1)*part4
-            integrsmall.append(G)
+            cg = part1 + (x1)*part2 + part3 + (x1)*part4
+            integrcg.append(cg)
             
-            
-           
             if choice == 1:
-                print(" G")
+                G = part1 + (x1)*part2 + part3 + (x1)*part4
+                integrsmall.append(G)
                 #Integrated function of aerodynamic loading, wrt z                
             elif choice == 2:
                 G = part1*x1 + 0.5*part2*(x1**2) + part3*x1 + 0.5*part4*(x1**2)
@@ -159,7 +159,8 @@ def g(x1):
             if dothing == True:
                 dothing = False
         integrsmall = np.array(integrsmall)
-        resultants_z_per_square = integrsmall
+        integrcg = np.array(integrcg)
+        resultants_z_per_square = integrcg
         integrsmall = np.sum(integrsmall) #summing the parts in the z direction to gain the force for a coordinate x
         
         integr.append(integrsmall)
@@ -168,41 +169,6 @@ def g(x1):
     
     return integr, resultants_z_per_square
 
-def cg(x2):
-    intcg = []
-    
-    for j in range(len(x)-1):
-        dothing = True
-        integrcg = []
-        for i in range(len(z)-1):
-            a0 = float(coefarray[i,j,0])
-            a1 = float(coefarray[i,j,1])
-            a2 = float(0.5*coefarray[i,j,2])
-            a3 = float(0.5*coefarray[i,j,3])
-            
-            part1 = a0*(z[i+1]-z[i])
-            part2 = a1*(z[i+1]-z[i])
-            part3 = a2*(z[i+1]**2-z[i]**2)
-            part4 = a3*(z[i+1]**2-z[i]**2)
-            
-            CG = ((0.5*a0*(z[i+1]**2 - z[i]**2) + 0.5*a1*(z[i+1]**2 - z[i]**2)*x2 + 
-                 (1/3)*a2*(z[i+1]**3-z[i]**3) + (1/3)*a3*(z[i+1]**3-z[i]**3)*x2)/(part1
-                 + (x2)*part2 + part3 + (x2)*part4))
-#            print(CG)
-            
-            if dothing == True:
-                dothing = False
-            
-            integrcg.append(CG)
-            
-        integrcg = np.array(integrcg)
-        integrcg = np.sum(integrcg)
-            
-        intcg.append(integrcg)
-            
-    intcg = np.array(intcg, dtype = 'f8')
-         
-    return intcg
          
 #value = input('value of x: ')
 value = x[18]  #          "DONT FORGET TO FIX"
@@ -215,22 +181,16 @@ for i in range(len(x)-1):
         t, resultants_z_per_square = g(value)
         finalg = t[i]
         print(finalg)                   #magintude of aerodynamic load on chord length for any x
-#        break
-    
-        u = cg(value)
-        finalcg = u[i]
-        print('cg location resulatant force is: ', finalcg)
         break
     
-
-
-testJorn = []
+cglist = []                       #getting the resultant force arm bij a = F/M
 for i in range(len(z)-1):
     welp = (z[i+1] + z[i])/2
-    testJorn.append(welp)
-    np.array(testJorn)
+    cglist.append(welp)
+    np.array(cglist)
    
-zloc_resultantforce_perx = sum(testJorn*resultants_z_per_square)/sum(resultants_z_per_square)
+zloc_resultantforce_perx = sum(cglist*resultants_z_per_square)/sum(resultants_z_per_square)
+print("cg location resultant force is: ", zloc_resultantforce_perx)
 
 
 """ Creating test for the intergration function, by using array of ones"""
