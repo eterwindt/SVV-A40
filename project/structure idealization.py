@@ -38,6 +38,9 @@ z_str=-1.0*cos(gamma)*(str_pitch-length_semi_remain)-0.5*ha
 y_str=0.5*ha-sin(gamma)*(str_pitch-length_semi_remain)
 listz.append(z_str)
 listy.append(y_str)
+#area stringer
+A_str=(wst+hst)*tst
+
 
 #remaining stringers on slope
 for i in range((int(nst/2)+1)-len(listz)):
@@ -51,8 +54,8 @@ listz.extend(np.flip(listz[1:7]))
 listy.insert(2,0.5*ha)
 listy.extend(-np.flip(listy[1:7]))
 
-#Calculating stringer area 
-A_str=(wst+hst)*tst
+
+
 My=500
 Mz=200
 Iyy=1000
@@ -186,3 +189,40 @@ for i in range(5):
     
     jup=B2_area_My+B1_area_My
     semiskcontri_My.append(jup)
+    
+    
+    
+#adding the semi circle skin contribution to the boom area lists
+B_list_Mz[0]=semiskcontri_Mz[2]
+B_list_Mz[1]=semiskcontri_Mz[3]
+B_list_Mz[2]=semiskcontri_Mz[4]+B_list_Mz[2]
+B_list_Mz[11]=semiskcontri_Mz[0]+B_list_Mz[11]
+B_list_Mz[12]=semiskcontri_Mz[1]
+
+B_list_My[0]=semiskcontri_My[2]
+B_list_My[1]=semiskcontri_My[3]
+B_list_My[2]=semiskcontri_My[4]+B_list_My[2]
+B_list_My[11]=semiskcontri_My[0]+B_list_My[11]
+B_list_My[12]=semiskcontri_My[1]
+
+#adding stiffener area to boom area's
+A_str=(wst+hst)*tst
+
+for i in range(12):
+    B_list_Mz[i]=B_list_Mz[i]+A_str
+    B_list_My[i]=B_list_My[i]+A_str
+
+B_list_Mz[0]=0.0 #Ask TA about this
+
+#Calculation of Izz and Iyy
+list_Izz=[]
+list_Iyy=[]
+for i in range(12):
+    Izz=B_list_Mz[i]*(listy[i])**2
+    list_Izz.append(Izz)
+IZZ=sum(list_Izz)
+
+for i in range(12):
+    Iyy=B_list_My[i]*(listz[i])**2
+    list_Iyy.append(Iyy)
+IYY=sum(list_Iyy)
