@@ -209,10 +209,9 @@ choice = int(input("Your choice: "))
 print()
 """From this we see that our Fres location calculation is correct, since for a linear distributed load,
 the Fres acts in the center of the aileron. This is also the outcome of our model with the test case"""
-     
 
 #value = input('value of x: ')
-value = x[12]  #          "DONT FORGET TO FIX"
+value = x[0]  #          "DONT FORGET TO FIX"
 print()
 
 coeffs = coefficients(data, x, z)
@@ -229,8 +228,8 @@ for i in range(len(x)-1):
     
 cglist = []                       #getting the resultant force arm by a = F/M
 for i in range(len(z)-1):
-    welp = (z[i+1] + z[i])/2
-    cglist.append(welp)
+    center = (z[i+1] + z[i])/2
+    cglist.append(center)
     np.array(cglist)
    
 zloc_resultantforce_perx = sum(cglist*resultants_z_per_square)/sum(resultants_z_per_square)
