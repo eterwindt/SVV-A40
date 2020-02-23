@@ -59,7 +59,7 @@ def load_data(filename):
     
     data = np.array(q, dtype='f8', copy=True, order='K')     #Coverting q into array
     
-    test_data = np.ones_like(data)
+    test_data = np.ones_like(data)      #test case for the num model
     
     return data, test_data, x, z
 
@@ -109,16 +109,18 @@ def coefficients(data, x, z):
 #coefarray = coefficients(test_data, x, z)
 
 """
-Numerical Verification of the linear bivariate spline interpolation by 
+Numerical Verification of the linear bivariate spline interpolation by  
 comparing the outcome of the function with the original data           
 for j in range(len(z)-1):
         for i in range(len(x)-1):
             coefs = coefarray[j,i,:]           
             function = coefs[0] + coefs[1]*x[i] + coefs[2]*z[j] + coefs[3]*x[i]*z[j]
 #            print (function)
+This holds true, since the output of the test is conform with the input
 """     
         
-"""Now to integrate the function wrt y to obtain a 1D f(x)"""
+"""Now to integrate the function wrt z to obtain a 1D f(x),
+and integrate wrt x"""
 
 def print_menu():
     print( "Choose an option")
@@ -138,7 +140,7 @@ def g(x1, coefarray, choice):
         integrsmall = []
         integrcg = []
         for i in range(len(z)-1):
-            a0 = float(coefarray[i,j,0])
+            a0 = float(coefarray[i,j,0])        
             a1 = float(coefarray[i,j,1])
             a2 = float(0.5*coefarray[i,j,2])
             a3 = float(0.5*coefarray[i,j,3])
@@ -197,7 +199,7 @@ filename = 'aerodynamicloadf100.dat'
 
 data, test_data, x, z = load_data(filename)
 
-testmode = input("Test mode? (y/n): ")
+testmode = input("Test mode? (y/n): ")      #entering test case to verify num model
 
 if testmode.lower() == 'y':
     data = test_data
@@ -205,11 +207,12 @@ if testmode.lower() == 'y':
 print_menu()
 choice = int(input("Your choice: "))
 print()
-
+"""From this we see that our Fres location calculation is correct, since for a linear distributed load,
+the Fres acts in the center of the aileron. This is also the outcome of our model with the test case"""
      
 
 #value = input('value of x: ')
-value = x[18]  #          "DONT FORGET TO FIX"
+value = x[12]  #          "DONT FORGET TO FIX"
 print()
 
 coeffs = coefficients(data, x, z)
@@ -220,10 +223,11 @@ for i in range(len(x)-1):
     else:
         t, resultants_z_per_square = g(value, coeffs, choice)
         finalg = t[i]
-        print(finalg)                   #magintude of aerodynamic load on chord length for any x
+        print("Final integrated value = ", finalg)  #magintude of aerodynamic load on chord length for any x
+        save = i                                    #integrated per your choice
         break
     
-cglist = []                       #getting the resultant force arm bij a = F/M
+cglist = []                       #getting the resultant force arm by a = F/M
 for i in range(len(z)-1):
     welp = (z[i+1] + z[i])/2
     cglist.append(welp)
@@ -232,8 +236,25 @@ for i in range(len(z)-1):
 zloc_resultantforce_perx = sum(cglist*resultants_z_per_square)/sum(resultants_z_per_square)
 print("cg location resultant force is: ", zloc_resultantforce_perx)
 
+#%%
+"""Testing if integration choice==1 is correct """
+from scipy.integrate import trapz
 
-""" Creating test for the intergration function, by using array of ones"""
+def calc_error(real, approx):           #relative error
+    error = real - abs(approx)
+    return np.abs(error) / real
+
+datatest = data[:,save]
+
+intgration_ref = trapz(z, datatest)
+print("The integration test = ",intgration_ref)
+error = calc_error(intgration_ref, finalg)
+print('The error = ', error)
+
+
+
+
+
 
 
 
