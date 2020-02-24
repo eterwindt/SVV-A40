@@ -14,13 +14,12 @@ Created on Mon Feb 17 14:56:53 2020
 #----------------------------- imports ----------------------------------------
 from numpy import pi, cos
 import numpy as np
-from matplotlib import pyplot as plt
 
 #----------------------- functions definitions --------------------------------
 Ca = 0.505 #[m], chord of aileron
 la = 1.611 #[m], span of aileron
 
-#-------------------------- main program --------------------------------------
+#-------------------------- definitions- --------------------------------------
 
 
 
@@ -40,7 +39,7 @@ def load_data(filename):
     Nz = len(q)
     
     theta_z = []
-    z       = []
+    zmin       = []
     theta_x = []
     x       = []
     for i in range(1,Nz+1):
@@ -48,7 +47,7 @@ def load_data(filename):
         theta_z_i1 = (i)*pi/Nz
     
         z_i = - 0.5*((Ca/2)*(1-cos(theta_z_i)) + (Ca/2)*(1-cos(theta_z_i1)))
-        z.append(z_i)
+        zmin.append(z_i)
     
     for j in range(1,Nx+1):
         theta_x_j = (j-1)*pi/Nx
@@ -60,6 +59,8 @@ def load_data(filename):
     data = np.array(q, dtype='f8', copy=True, order='K')     #Coverting q into array
     
     test_data = np.ones_like(data)      #test case for the num model
+    z = (-1)*np.array(zmin)
+    data = np.fliplr(data)
     
     return data, test_data, x, z
 
@@ -126,10 +127,10 @@ def print_menu():
     print( "Choose an option")
     print() 
     print( "1) Find Rforce at an x-coordinate due to aerodynamic loading")
-    print( "2) Force f(x) integrated once")
-    print( "3) Force f(x) integrated twice")
-    print( "4) Force f(x) integrated thrice")
-    print( "5) Force f(x) integrated four times")
+    print( "2) Force f(x) integrated once, up to x")
+    print( "3) Force f(x) integrated twice, up to x")
+    print( "4) Force f(x) integrated thrice, up to x")
+    print( "5) Force f(x) integrated four times, up to x")
 
 
 def g(x1, coefarray, choice):
@@ -151,28 +152,56 @@ def g(x1, coefarray, choice):
             part4 = a3*(z[i+1]**2-z[i]**2)
            
             
-            cg = part1 + (x1)*part2 + part3 + (x1)*part4
+            cg = part1 + float(x1)*part2 + part3 + float(x1)*part4
             integrcg.append(cg)
             
             if choice == 1:
-                G = part1 + (x1)*part2 + part3 + (x1)*part4
+                G = part1 + float(x1)*part2 + part3 + float(x1)*part4
                 integrsmall.append(G)
-                #Integrated function of aerodynamic loading, wrt z                
+                #Integrated function of aerodynamic loading, wrt z at a single x               
             elif choice == 2:
-                G = part1*x1 + 0.5*part2*(x1**2) + part3*x1 + 0.5*part4*(x1**2)
-                integrsmall.append(G)
+                if float(x1)>x[j+1]:
+                    G = part1*(x[j+1]-x[j]) + 0.5*part2*(x[j+1]**2-x[j]**2) +\
+                    part3*(x[j+1]-x[j]) + 0.5*part4*(x[j+1]**2-x[j]**2)
+                    integrsmall.append(G)
+                else:
+                    G = part1*(float(x1)-x[j]) + 0.5*part2*(float(x1)**2-x[j]**2) +\
+                    part3*(float(x1)-x[j]) + 0.5*part4*(float(x1)**2-x[j]**2)
+                    integrsmall.append(G)
+                    break
                 #Integrated function of x wrt x
             elif choice == 3:
-                G = 0.5*part1*(x1**2) + (1/6)*part2*(x1**3) + 0.5*part3*(x1**2) + (1/6)*part4*(x1**3)
-                integrsmall.append(G)
+                if float(x1)>x[j+1]:
+                    G = 0.5*part1*(x[j+1]**2-x[j]**2) + (1/6)*part2*(x[j+1]**3-x[j]**3) +\
+                    0.5*part3*(x[j+1]**2-x[j]**2) + (1/6)*part4*(x[j+1]**3-x[j]**3)
+                    integrsmall.append(G)
+                else:
+                    G = 0.5*part1*(float(x1)**2-x[j]**2) + (1/6)*part2*(float(x1)**3-x[j]**3) +\
+                    0.5*part3*(float(x1)**2-x[j]**2) + (1/6)*part4*(float(x1)**3-x[j]**3)
+                    integrsmall.append(G)
+                    break
                 #Integrated function of x wrt x twice
             elif choice == 4:
-                G = (1/6)*part1*(x1**3) + (1/24)*part2*(x1**4) + (1/6)*part3*(x1**3) + (1/24)*part4*(x1**4)
-                integrsmall.append(G)
+                if float(x1)>x[j+1]:
+                    G = (1/6)*part1*(x[j+1]**3-x[j]**3) + (1/24)*part2*(x[j+1]**4-x[j]**4) +\
+                    (1/6)*part3*(x[j+1]**3-x[j]**3) + (1/24)*part4*(x[j+1]**4-x[j]**4)
+                    integrsmall.append(G)
+                else:
+                    G = (1/6)*part1*(float(x1)**3-x[j]**3) + (1/24)*part2*(float(x1)**4-x[j]**4) +\
+                    (1/6)*part3*(float(x1)**3-x[j]**3) + (1/24)*part4*(float(x1)**4-x[j]**4)
+                    integrsmall.append(G)
+                    break
                 #Integrated function of x wrt x thrice
             elif choice == 5:
-                G = (1/24)*part1*(x1**4) + (1/120)*part2*(x1**5) + (1/24)*part3*(x1**4) + (1/120)*part4*(x1**5)
-                integrsmall.append(G)
+                if float(x1)>x[j+1]:
+                    G = (1/24)*part1*(x[j+1]**4-x[j]**4) + (1/120)*part2*(x[j+1]**5-x[j]**5) +\
+                    (1/24)*part3*(x[j+1]**4-x[j]**4) + (1/120)*part4*(x[j+1]**5-x[j]**5)
+                    integrsmall.append(G)
+                else:
+                    G = (1/24)*part1*(float(x1)**4-x[j]**4) + (1/120)*part2*(float(x1)**5-x[j]**5) +\
+                    (1/24)*part3*(float(x1)**4-x[j]**4) + (1/120)*part4*(float(x1)**5-x[j]**5)
+                    integrsmall.append(G)
+                    break
                 #Integrated function of x wrt x four times
             else: 
                 print("That is not a valid choice")
@@ -183,7 +212,7 @@ def g(x1, coefarray, choice):
         integrsmall = np.array(integrsmall)
         integrcg = np.array(integrcg)
         resultants_z_per_square = integrcg
-        integrsmall = np.sum(integrsmall) #summing the parts in the z direction to gain the force for a coordinate x
+        integrsmall = np.sum(integrsmall) #summing the parts in the z direction to gain the force in x
         
         integr.append(integrsmall)
        
@@ -193,50 +222,60 @@ def g(x1, coefarray, choice):
 
 
 
-#%% Main Code:    
+#%% Main Program:    
 
 filename = 'aerodynamicloadf100.dat'    
 
 data, test_data, x, z = load_data(filename)
 
-testmode = input("Test mode? (y/n): ")      #entering test case to verify num model
-
-if testmode.lower() == 'y':
-    data = test_data
-
-print_menu()
-choice = int(input("Your choice: "))
-print()
+#testmode = input("Test mode? (y/n): ")      #entering test case to verify num model
+#
+#if testmode.lower() == 'y':
+#    data = test_data
+#
+#print_menu()
+#choice = int(input("Your choice: "))
+#print()
 """From this we see that our Fres location calculation is correct, since for a linear distributed load,
 the Fres acts in the center of the aileron. This is also the outcome of our model with the test case"""
 
-#value = input('value of x: ')
-value = x[0]  #          "DONT FORGET TO FIX"
-print()
+value = input('value of x: ')
+#value = x[0]  
+#print()
 
+choice = 2      #set to one if you want the location of Fres
 coeffs = coefficients(data, x, z)
 
-for i in range(len(x)-1):
-    if float(value) > float(x[i]):       #determining in which part of the aileron we are and which g(x) to use
-        pass
-    else:
-        t, resultants_z_per_square = g(value, coeffs, choice)
-        finalg = t[i]
-        print("Final integrated value = ", finalg)  #magintude of aerodynamic load on chord length for any x
-        save = i                                    #integrated per your choice
-        break
-    
-cglist = []                       #getting the resultant force arm by a = F/M
-for i in range(len(z)-1):
-    center = (z[i+1] + z[i])/2
-    cglist.append(center)
-    np.array(cglist)
-   
-zloc_resultantforce_perx = sum(cglist*resultants_z_per_square)/sum(resultants_z_per_square)
-print("cg location resultant force is: ", zloc_resultantforce_perx)
+"""For the interation of forces """
+final = g(value, coeffs, 2)
+print("Integrated value: ", np.sum(final[0]))
+
+"""for the Fres per slice and location of Fres"""
+#finallist = []
+#for i in range(len(x)-1):
+#    if float(value) > float(x[i]):       #determining in which part of the aileron we are and which g(x) to use
+#        pass
+#    else:
+#        t, resultants_z_per_square = g(value, coeffs, choice)
+#        finalg = t[i]
+#        finallist.append(finalg)
+#        print("Final integrated value = ", finalg)  #magintude of aerodynamic load on chord length for any x
+#        save = i                                    #integrated per your choice
+#        break
+#print(sum(finallist))
+#    
+#if choice ==1:
+#    cglist = []                       #getting the resultant force arm by a = F/M
+#    for i in range(len(z)-1):
+#        center = (z[i+1] + z[i])/2
+#        cglist.append(center)
+#        np.array(cglist)
+#       
+#    zloc_resultantforce_perx = sum(cglist*resultants_z_per_square)/sum(resultants_z_per_square)
+#    print("cg location resultant force is: ", zloc_resultantforce_perx)
 
 #%%
-"""Testing if integration choice==1 is correct """
+"""Testing if 1D integration choice==1 is correct 
 from scipy.integrate import trapz
 
 def calc_error(real, approx):           #relative error
@@ -249,7 +288,7 @@ intgration_ref = trapz(z, datatest)
 print("The integration test = ",intgration_ref)
 error = calc_error(intgration_ref, finalg)
 print('The error = ', error)
-
+"""
 
 
 
