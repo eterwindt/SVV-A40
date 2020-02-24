@@ -158,7 +158,7 @@ def g(x1, coefarray, choice):
             if choice == 1:
                 G = part1 + float(x1)*part2 + part3 + float(x1)*part4
                 integrsmall.append(G)
-                #Integrated function of aerodynamic loading, wrt z at a single x               
+                #Integrated function of aerodynamic loading, wrt z to get f(x)               
             elif choice == 2:
                 if float(x1)>x[j+1]:
                     G = part1*(x[j+1]-x[j]) + 0.5*part2*(x[j+1]**2-x[j]**2) +\
@@ -227,17 +227,18 @@ def g(x1, coefarray, choice):
 filename = 'aerodynamicloadf100.dat'    
 
 data, test_data, x, z = load_data(filename)
+"""
+testmode = input("Test mode? (y/n): ")      #entering test case to verify num model
 
-#testmode = input("Test mode? (y/n): ")      #entering test case to verify num model
-#
-#if testmode.lower() == 'y':
-#    data = test_data
-#
+if testmode.lower() == 'y':
+    data = test_data
+
+From this we see that our Fres location calculation is correct, since for a linear distributed load,
+the Fres acts in the center of the aileron. This is also the outcome of our model with the test case"""
+
 #print_menu()
 #choice = int(input("Your choice: "))
 #print()
-"""From this we see that our Fres location calculation is correct, since for a linear distributed load,
-the Fres acts in the center of the aileron. This is also the outcome of our model with the test case"""
 
 value = input('value of x: ')
 #value = x[0]  
@@ -249,6 +250,7 @@ coeffs = coefficients(data, x, z)
 """For the interation of forces """
 final = g(value, coeffs, 2)
 print("Integrated value: ", np.sum(final[0]))
+
 
 """for the Fres per slice and location of Fres"""
 #finallist = []
@@ -288,6 +290,8 @@ intgration_ref = trapz(z, datatest)
 print("The integration test = ",intgration_ref)
 error = calc_error(intgration_ref, finalg)
 print('The error = ', error)
+
+Since the error <<5%, it is within our bounds and thus verified
 """
 
 
