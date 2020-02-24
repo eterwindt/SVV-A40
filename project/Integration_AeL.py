@@ -59,7 +59,8 @@ def load_data(filename):
     data = np.array(q, dtype='f8', copy=True, order='K')     #Coverting q into array
     
     test_data = np.ones_like(data)      #test case for the num model
-    z = (-1)*np.array(zmin)
+    
+    z = (-1)*np.array(zmin) #making data conform with macauley and section analysis
     data = np.fliplr(data)
     
     return data, test_data, x, z
@@ -135,13 +136,11 @@ def print_menu():
 
 def g(x1, coefarray, choice):
     integr = []
-    test_l = []
     
     for j in range(len(x)-1):
         dothing = True
         integrsmall = []
         integrcg = []
-        test_s = []
         for i in range(len(z)-1):
             a0 = float(coefarray[i,j,0])        
             a1 = float(coefarray[i,j,1])
@@ -160,8 +159,6 @@ def g(x1, coefarray, choice):
             if choice == 1:
                 G = part1 + float(x1)*part2 + part3 + float(x1)*part4
                 integrsmall.append(G)
-                T = (x[j+1]-x[j]) + (z[i+1]-z[i]) + (x[j+1]-x[j])*(z[i+1]-z[i])
-                test_s.append(T)
                 #Integrated function of aerodynamic loading, wrt z to get f(x)               
             elif choice == 2:
                 if float(x1)>x[j+1]:
@@ -215,17 +212,13 @@ def g(x1, coefarray, choice):
             if dothing == True:
                 dothing = False
         integrsmall = np.array(integrsmall)
-        test_s=np.array(test_s)
         integrcg = np.array(integrcg)
         resultants_z_per_square = integrcg
-        test_s = np.sum(test_s)
         integrsmall = np.sum(integrsmall) #summing the parts in the z direction to gain the force in x
         
         integr.append(integrsmall)
-        test_l.append(test_s)
     integr = np.array(integr, dtype = 'f8') #array containing integrated functions to get g(x)
-    test_l = np.array(test_l, dtype = 'f8')
-    return integr, resultants_z_per_square, test_l
+    return integr, resultants_z_per_square
 
 
 
@@ -251,38 +244,38 @@ value = input('value of x: ')
 #value = x[0]  
 #print()
 
-choice = 1      #set to one if you want the location of Fres
+choice = 2      #set to one if you want the location of Fres
 coeffs = coefficients(data, x, z)
 
-"""For the interation of forces """
-final = g(value, coeffs, 1)   #edit 3rd input to change number of integrations
-print("Integrated value: ", np.sum(final[0]))
-print("test: ", np.sum(final[2]))
-
-
 """for the Fres per slice and location of Fres"""
-#finallist = []
-#for i in range(len(x)-1):
-#    if float(value) > float(x[i]):       #determining in which part of the aileron we are and which g(x) to use
-#        pass
-#    else:
-#        t, resultants_z_per_square = g(value, coeffs, choice)
-#        finalg = t[i]
-#        finallist.append(finalg)
-#        print("Final integrated value = ", finalg)  #magintude of aerodynamic load on chord length for any x
-#        save = i                                    #integrated per your choice
-#        break
-#print(sum(finallist))
-#    
-#if choice ==1:
-#    cglist = []                       #getting the resultant force arm by a = F/M
-#    for i in range(len(z)-1):
-#        center = (z[i+1] + z[i])/2
-#        cglist.append(center)
-#        np.array(cglist)
-#       
-#    zloc_resultantforce_perx = sum(cglist*resultants_z_per_square)/sum(resultants_z_per_square)
-#    print("cg location resultant force is: ", zloc_resultantforce_perx)
+if choice ==1:    
+    finallist = []
+    for i in range(len(x)-1):
+        if float(value) > float(x[i]):       #determining in which part of the aileron we are and which g(x) to use
+            pass
+        else:
+            t, resultants_z_per_square = g(value, coeffs, choice)
+            finalg = t[i]
+            finallist.append(finalg)
+            print("Final integrated value = ", finalg)  #magintude of aerodynamic load on chord length for any x
+            save = i                                    #integrated per your choice
+            break
+    print(sum(finallist))
+    
+    cglist = []                       #getting the resultant force arm by a = F/M
+    for i in range(len(z)-1):
+        center = (z[i+1] + z[i])/2
+        cglist.append(center)
+        np.array(cglist)
+       
+    zloc_resultantforce_perx = sum(cglist*resultants_z_per_square)/sum(resultants_z_per_square)
+    print("cg location resultant force is: ", zloc_resultantforce_perx)
+
+"""For the interation of forces """
+if choice >1:
+    final = g(value, coeffs, choice)   #edit 3rd input to change number of integrations
+    print("Integrated value: ", np.sum(final[0]))
+    #print("test: ", np.sum(final[2]))
 
 #%%
 #"""Testing if 1D integration choice==1 is correct """
