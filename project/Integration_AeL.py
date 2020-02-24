@@ -135,11 +135,13 @@ def print_menu():
 
 def g(x1, coefarray, choice):
     integr = []
+    test_l = []
     
     for j in range(len(x)-1):
         dothing = True
         integrsmall = []
         integrcg = []
+        test_s = []
         for i in range(len(z)-1):
             a0 = float(coefarray[i,j,0])        
             a1 = float(coefarray[i,j,1])
@@ -158,6 +160,8 @@ def g(x1, coefarray, choice):
             if choice == 1:
                 G = part1 + float(x1)*part2 + part3 + float(x1)*part4
                 integrsmall.append(G)
+                T = (x[j+1]-x[j]) + (z[i+1]-z[i]) + (x[j+1]-x[j])*(z[i+1]-z[i])
+                test_s.append(T)
                 #Integrated function of aerodynamic loading, wrt z to get f(x)               
             elif choice == 2:
                 if float(x1)>x[j+1]:
@@ -169,6 +173,7 @@ def g(x1, coefarray, choice):
                     part3*(float(x1)-x[j]) + 0.5*part4*(float(x1)**2-x[j]**2)
                     integrsmall.append(G)
                     break
+#                T = 0.6325*
                 #Integrated function of x wrt x
             elif choice == 3:
                 if float(x1)>x[j+1]:
@@ -210,15 +215,17 @@ def g(x1, coefarray, choice):
             if dothing == True:
                 dothing = False
         integrsmall = np.array(integrsmall)
+        test_s=np.array(test_s)
         integrcg = np.array(integrcg)
         resultants_z_per_square = integrcg
+        test_s = np.sum(test_s)
         integrsmall = np.sum(integrsmall) #summing the parts in the z direction to gain the force in x
         
         integr.append(integrsmall)
-       
+        test_l.append(test_s)
     integr = np.array(integr, dtype = 'f8') #array containing integrated functions to get g(x)
-    
-    return integr, resultants_z_per_square
+    test_l = np.array(test_l, dtype = 'f8')
+    return integr, resultants_z_per_square, test_l
 
 
 
@@ -244,12 +251,13 @@ value = input('value of x: ')
 #value = x[0]  
 #print()
 
-choice = 2      #set to one if you want the location of Fres
+choice = 1      #set to one if you want the location of Fres
 coeffs = coefficients(data, x, z)
 
 """For the interation of forces """
-final = g(value, coeffs, 2)
+final = g(value, coeffs, 1)   #edit 3rd input to change number of integrations
 print("Integrated value: ", np.sum(final[0]))
+print("test: ", np.sum(final[2]))
 
 
 """for the Fres per slice and location of Fres"""
@@ -277,22 +285,22 @@ print("Integrated value: ", np.sum(final[0]))
 #    print("cg location resultant force is: ", zloc_resultantforce_perx)
 
 #%%
-"""Testing if 1D integration choice==1 is correct 
-from scipy.integrate import trapz
+#"""Testing if 1D integration choice==1 is correct """
+#from scipy.integrate import trapz
+#
+#def calc_error(real, approx):           #relative error
+#    error = abs(real) - approx
+#    return np.abs(error) / real
+#
+#datatest = data[:,save]
+#
+#intgration_ref = trapz(z, datatest)
+#print("The integration test = ",intgration_ref)
+#error = calc_error(intgration_ref, finalg)
+#print('The error = ', error)
+#
+#"""Since the error <<5%, it is within our bounds and thus verified"""
 
-def calc_error(real, approx):           #relative error
-    error = real - abs(approx)
-    return np.abs(error) / real
-
-datatest = data[:,save]
-
-intgration_ref = trapz(z, datatest)
-print("The integration test = ",intgration_ref)
-error = calc_error(intgration_ref, finalg)
-print('The error = ', error)
-
-Since the error <<5%, it is within our bounds and thus verified
-"""
 
 
 
