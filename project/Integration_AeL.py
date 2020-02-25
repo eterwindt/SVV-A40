@@ -38,9 +38,9 @@ def load_data(filename, Ca, la):
     Nx = len(q[0])
     Nz = len(q)
     
-    theta_z = []
+#    theta_z = []
     zmin       = []
-    theta_x = []
+#    theta_x = []
     x       = []
     for i in range(1,Nz+1):
         theta_z_i = (i-1)*pi/Nz
@@ -161,7 +161,7 @@ def g(x1, coefarray, choice, x, z):
                 integrsmall.append(G)
                 #Integrated function of aerodynamic loading, wrt z to get f(x)               
             elif choice == 2:
-                if float(x1)>x[j+1]:
+                if float(x1)>=x[j+1]:
                     G = part1*(x[j+1]-x[j]) + 0.5*part2*(x[j+1]**2-x[j]**2) +\
                     part3*(x[j+1]-x[j]) + 0.5*part4*(x[j+1]**2-x[j]**2)
                     integrsmall.append(G)
@@ -170,10 +170,9 @@ def g(x1, coefarray, choice, x, z):
                     part3*(float(x1)-x[j]) + 0.5*part4*(float(x1)**2-x[j]**2)
                     integrsmall.append(G)
                     break
-#                T = 0.6325*
                 #Integrated function of x wrt x
             elif choice == 3:
-                if float(x1)>x[j+1]:
+                if float(x1)>=x[j+1]:
                     G = 0.5*part1*(x[j+1]**2-x[j]**2) + (1/6)*part2*(x[j+1]**3-x[j]**3) +\
                     0.5*part3*(x[j+1]**2-x[j]**2) + (1/6)*part4*(x[j+1]**3-x[j]**3)
                     integrsmall.append(G)
@@ -184,7 +183,7 @@ def g(x1, coefarray, choice, x, z):
                     break
                 #Integrated function of x wrt x twice
             elif choice == 4:
-                if float(x1)>x[j+1]:
+                if float(x1)>=x[j+1]:
                     G = (1/6)*part1*(x[j+1]**3-x[j]**3) + (1/24)*part2*(x[j+1]**4-x[j]**4) +\
                     (1/6)*part3*(x[j+1]**3-x[j]**3) + (1/24)*part4*(x[j+1]**4-x[j]**4)
                     integrsmall.append(G)
@@ -195,7 +194,7 @@ def g(x1, coefarray, choice, x, z):
                     break
                 #Integrated function of x wrt x thrice
             elif choice == 5:
-                if float(x1)>x[j+1]:
+                if float(x1)>=x[j+1]:
                     G = (1/24)*part1*(x[j+1]**4-x[j]**4) + (1/120)*part2*(x[j+1]**5-x[j]**5) +\
                     (1/24)*part3*(x[j+1]**4-x[j]**4) + (1/120)*part4*(x[j+1]**5-x[j]**5)
                     integrsmall.append(G)
@@ -223,13 +222,31 @@ def g(x1, coefarray, choice, x, z):
     return integr, resultants_z_per_square
 
 
-#%% Main Program:    
+#%% Test cases: 
+    
 
 filename = 'aerodynamicloadf100.dat'    
 
 data, test_data, x, z = load_data(filename, Ca, la)
+
+
+
+""" verifying the integration """
+veritestx = [0,1,2,3,4,5]
+veritestz = [0,0.5,1.0,1.5,2.0]
+vericoef = np.ones((5,6,4))
+testchoice = 5
+
+verification = g(5, vericoef, testchoice, veritestx, veritestz)
+answer = verification[0]
+if testchoice==1:
+    print("test = ", answer[0])
+if testchoice>1:
+    print("test = ", sum(answer))
+
+
 """
-Verifying the z-loaction of the resultant force
+Verifying the z-loaction (choice==1) and x-location (choice>1) of the resultant force
 testmode = input("Test mode? (y/n): ")      #entering test case to verify num model
 
 if testmode.lower() == 'y':
@@ -238,8 +255,8 @@ if testmode.lower() == 'y':
 From this we see that our Fres location calculation is correct, since for a linear distributed load,
 the Fres acts in the center of the aileron. This is also the outcome of our model with the test case"""
 
-""" verifying the integration """
-#veritest = np.array
+#%% Main Program:
+
 #print_menu()
 #choice = int(input("Your choice: "))
 #print()
@@ -263,7 +280,7 @@ for i in range(len(x)-1):
             print("Final integrated value = ", finalg)  #magintude of aerodynamic load on chord length for any x
         save = i                                    #integrated per your choice
         break
-print(sum(finallist))
+#print(sum(finallist))
 
 cglistz = []                       #getting the resultant force arm by a = F/M
 cglistx = []
@@ -291,12 +308,8 @@ if choice >1:
     print("x location Fres full aileron is:", xloc_resultantforce) #for full aileron set x>=1.611
 
 
-
-
-
 #%%
 #"""Testing if 1D integration choice==1 is correct """
-#from scipy.integrate import trapz
 #
 #def calc_error(real, approx):           #relative error
 #    error = abs(real) - approx
@@ -304,7 +317,6 @@ if choice >1:
 #
 #datatest = data[:,save]
 #
-#intgration_ref = trapz(z, datatest)
 #print("The integration test = ",intgration_ref)
 #error = calc_error(intgration_ref, finalg)
 #print('The error = ', error)
