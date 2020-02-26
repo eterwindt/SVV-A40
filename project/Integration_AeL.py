@@ -34,7 +34,7 @@ def readfile(filename):
     return lines
 
 def load_data(filename, Ca, la):
-    q = readfile(filename)                          #Importing all aerodynamic loading data into lists in lists
+    q = readfile(filename)             #Importing all aerodynamic loading data into lists in lists
     Nx = len(q[0])
     Nz = len(q)
     
@@ -80,20 +80,21 @@ def coefficients(data, x, z):
         coefsmall = []
         for i in range(len(x) - 1):
 
-            intarray = [[1, float(x[i]), float(z[j]), float(x[i]) * float(z[j])],
+            intarray = [[1, float(x[i]), float(z[j]), float(x[i])*float(z[j])],
+                        [1, float(x[i]), float(z[j+1]), float(x[i])*float(z[j+1])],
+                        [1, float(x[i+1]), float(z[j]), float(x[i+1])*float(z[j])],
+                        [1, float(x[i+1]), float(z[j+1]), float(x[i+1])*float(z[j+1])]]
                         # bivariate linear spline interpolation matrix
-                        [1, float(x[i]), float(z[j + 1]), float(x[i]) * float(z[j + 1])],
-                        [1, float(x[i + 1]), float(z[j]), float(x[i + 1]) * float(z[j])],
-                        [1, float(x[i + 1]), float(z[j + 1]), float(x[i + 1]) * float(z[j + 1])]]
-
-            dataarray = [[float(data[j, i])],  # solution matrix from aerodynnamic loading
+            dataarray = [[float(data[j, i])],  
                          [float(data[j + 1, i])],
                          [float(data[j, i + 1])],
                          [float(data[j + 1, i + 1])]]
-            coef = np.dot(np.linalg.inv(intarray), dataarray)  # obtaining coefficient matrix for solving linear splines
-
-            coefsmall.append(
-                coef)  # creating a matrix with coefficients for all the data points on the aileron in x-dir
+                        # solution matrix from aerodynnamic loading
+            coef = np.dot(np.linalg.inv(intarray), dataarray)  
+            # obtaining coefficient matrix for solving linear splines
+            
+            coefsmall.append(coef)
+            # creating a matrix with coefficients for all the data points on the aileron in x-dir
             if dothing == True:
                 # print(coef)
                 dothing = False
@@ -102,13 +103,11 @@ def coefficients(data, x, z):
         coefsmall = np.reshape(coefsmall, (40, 1, 4, 1))
 
         coefarray.append(coefsmall)
-    coefarray = np.array(coefarray, dtype='f8')  # creating the matrix in z-dir by appending the x-dir matrices
+    coefarray = np.array(coefarray, dtype='f8')  
+    # creating the matrix in z-dir by appending the x-dir matrices
+    
     coefarray = np.reshape(coefarray, (80, 40, 4))
     return coefarray
-    # print(coefarray[0, 0, 0:4])
-
-
-#coefarray = coefficients(test_data, x, z)
 
 """
 Numerical Verification of the linear bivariate spline interpolation by  
@@ -231,7 +230,7 @@ data, test_data, x, z = load_data(filename, Ca, la)
 
 
 
-""" verifying the integration """
+""" verifying the integration
 veritestx = [0,1,2,3,4,5]
 veritestz = [0,0.5,1.0,1.5,2.0]
 vericoef = np.ones((5,6,4))
@@ -240,9 +239,25 @@ testchoice = 5
 verification = g(5, vericoef, testchoice, veritestx, veritestz)
 answer = verification[0]
 if testchoice==1:
+    print("expected answers:")
+    print("x = 1 -> 8.0")
+    print("x = 3 -> 16")
+    print("x = 5 -> 24")
     print("test = ", answer[0])
 if testchoice>1:
+    if testchoice==2:
+        print("expected answer for full range integral: 70")
+    if testchoice==3:
+        print("expected answer for full range integral: 133.33")
+    if testchoice==4:
+        print("expected answer for full range integral: 187.5")
+    if testchoice==5:
+        print("expected answer for full range integral: 208.33")
     print("test = ", sum(answer))
+    
+
+The test integration the same as the handcalculated values so the integration model is correct.
+"""
 
 
 """
@@ -252,8 +267,9 @@ testmode = input("Test mode? (y/n): ")      #entering test case to verify num mo
 if testmode.lower() == 'y':
     data = test_data
 
-From this we see that our Fres location calculation is correct, since for a linear distributed load,
-the Fres acts in the center of the aileron. This is also the outcome of our model with the test case"""
+From this we see that our Fres location calculation is correct, 
+since for a linear distributed load,the Fres acts in the center of the aileron. 
+This is also the outcome of our model with the test case"""
 
 #%% Main Program:
 
@@ -306,26 +322,6 @@ if choice ==1:
 if choice >1:
     xloc_resultantforce = sum(cglistx*final[0])/sum(final[0])
     print("x location Fres full aileron is:", xloc_resultantforce) #for full aileron set x>=1.611
-
-
-#%%
-#"""Testing if 1D integration choice==1 is correct """
-#
-#def calc_error(real, approx):           #relative error
-#    error = abs(real) - approx
-#    return np.abs(error) / real
-#
-#datatest = data[:,save]
-#
-#print("The integration test = ",intgration_ref)
-#error = calc_error(intgration_ref, finalg)
-#print('The error = ', error)
-#
-#"""Since the error <<5%, it is within our bounds and thus verified"""
-
-
-
-
 
 
 
