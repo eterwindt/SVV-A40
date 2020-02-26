@@ -22,7 +22,7 @@ la = 1.611 #[m], span of aileron
 #-------------------------- definitions- --------------------------------------
 
 
-
+#OBTAINING DATA
 def readfile(filename):
     file = open(filename, "r")
     lines = file.readlines()                    # read all lines, returns list
@@ -33,6 +33,7 @@ def readfile(filename):
     
     return lines
 
+#OBTAINING COORDINATES
 def load_data(filename, Ca, la):
     q = readfile(filename)             #Importing all aerodynamic loading data into lists in lists
     Nx = len(q[0])
@@ -65,7 +66,7 @@ def load_data(filename, Ca, la):
     
     return data, test_data, x, z
 
-
+#NUMERICAL INTERPOLATION
 def coefficients(data, x, z):
     '''
     :param data: loading data
@@ -123,6 +124,7 @@ This holds true, since the output of the test is conform with the input
 """Now to integrate the function wrt z to obtain a 1D f(x),
 and integrate wrt x"""
 
+#NUMERICAL INTEGRATION
 def print_menu():
     print( "Choose an option")
     print() 
@@ -134,6 +136,14 @@ def print_menu():
 
 
 def g(x1, coefarray, choice, x, z):
+     '''
+    :param x1: location at aileron at which or to where to integrate
+    :coefarray: The coefficients obtained for interpolation
+    :choice: How many times to integrate (see menu for options)
+    :param x: list of x coords
+    :param z: list of z coords
+    :return: value integration, resultant force per square
+    '''
     integr = []
     
     for j in range(len(x)-1):
@@ -234,7 +244,7 @@ data, test_data, x, z = load_data(filename, Ca, la)
 veritestx = [0,1,2,3,4,5]
 veritestz = [0,0.5,1.0,1.5,2.0]
 vericoef = np.ones((5,6,4))
-testchoice = 5
+testchoice = 2
 
 verification = g(5, vericoef, testchoice, veritestx, veritestz)
 answer = verification[0]
@@ -262,6 +272,7 @@ The test integration the same as the handcalculated values so the integration mo
 
 """
 Verifying the z-loaction (choice==1) and x-location (choice>1) of the resultant force
+
 testmode = input("Test mode? (y/n): ")      #entering test case to verify num model
 
 if testmode.lower() == 'y':
