@@ -61,7 +61,6 @@ def load_data(filename, Ca, la):
     
     z = (-1)*np.array(zmin) #making data conform with macauley and section analysis
     data = np.fliplr(data)
-#    data = 1000*data
     
     return data, test_data, x, z
 
@@ -85,10 +84,10 @@ def coefficients(data, x, z):
                         [1, float(x[i+1]), float(z[j]), float(x[i+1])*float(z[j])],
                         [1, float(x[i+1]), float(z[j+1]), float(x[i+1])*float(z[j+1])]]
                         # bivariate linear spline interpolation matrix
-            dataarray = [[float(data[j,i])],  
-                         [float(data[j+1,i])],
-                         [float(data[j,i+1])],
-                         [float(data[j+1,i+1])]]
+            dataarray = [[float(data[j, i])],  
+                         [float(data[j + 1, i])],
+                         [float(data[j, i + 1])],
+                         [float(data[j + 1, i + 1])]]
                         # solution matrix from aerodynnamic loading
             coef = np.dot(np.linalg.inv(intarray), dataarray)  
             # obtaining coefficient matrix for solving linear splines
@@ -144,11 +143,23 @@ def g(x1, coefarray, choice, x, z):
     :return: value integration, resultant force per square
     '''
     """Integration"""
-    integr = []
+    integr1 = []
+    integr2 = []
+    integr3 = []
+    integr4 = []
+    integr5 = []
     for j in range(len(x)-1):
         dothing = True
-        integrsmall = []
+        integrsmall1 = []
+        integrsmall2 = []
+        integrsmall3 = []
+        integrsmall4 = []
+        integrsmall5 = []
         integrcgz = []
+        C1 = 0
+        C2 = 0
+        C3 = 0
+        C4 = 0
         for i in range(len(z)-1):
             a0 = float(coefarray[i,j,0])        
             a1 = float(coefarray[i,j,1])
@@ -164,72 +175,97 @@ def g(x1, coefarray, choice, x, z):
             cgz = part1 + float(x1)*part2 + part3 + float(x1)*part4
             integrcgz.append(cgz)
             
-            if choice == 1:
-                G = part1 + float(x1)*part2 + part3 + float(x1)*part4
-                integrsmall.append(G)
-                #Integrated function of aerodynamic loading, wrt z to get f(x)               
-            elif choice == 2:
-                if float(x1)>=x[j+1]:
-                    G = part1*(x[j+1]-x[j]) + 0.5*part2*(x[j+1]**2-x[j]**2) +\
-                    part3*(x[j+1]-x[j]) + 0.5*part4*(x[j+1]**2-x[j]**2)
-                    integrsmall.append(G)
-                else:
-                    G = part1*(float(x1)-x[j]) + 0.5*part2*(float(x1)**2-x[j]**2) +\
-                    part3*(float(x1)-x[j]) + 0.5*part4*(float(x1)**2-x[j]**2)
-                    integrsmall.append(G)
-                    print("test works")
-                    break
-                #Integrated function of x wrt x
-            elif choice == 3:
-                if float(x1)>=x[j+1]:
-                    G = 0.5*part1*(x[j+1]**2-x[j]**2) + (1/6)*part2*(x[j+1]**3-x[j]**3) +\
-                    0.5*part3*(x[j+1]**2-x[j]**2) + (1/6)*part4*(x[j+1]**3-x[j]**3)
-                    integrsmall.append(G)
-                else:
-                    G = 0.5*part1*(float(x1)**2-x[j]**2) + (1/6)*part2*(float(x1)**3-x[j]**3) +\
-                    0.5*part3*(float(x1)**2-x[j]**2) + (1/6)*part4*(float(x1)**3-x[j]**3)
-                    integrsmall.append(G)
-                    break
-                #Integrated function of x wrt x twice
-            elif choice == 4:
-                if float(x1)>=x[j+1]:
-                    G = (1/6)*part1*(x[j+1]**3-x[j]**3) + (1/24)*part2*(x[j+1]**4-x[j]**4) +\
-                    (1/6)*part3*(x[j+1]**3-x[j]**3) + (1/24)*part4*(x[j+1]**4-x[j]**4)
-                    integrsmall.append(G)
-                else:
-                    G = (1/6)*part1*(float(x1)**3-x[j]**3) + (1/24)*part2*(float(x1)**4-x[j]**4) +\
-                    (1/6)*part3*(float(x1)**3-x[j]**3) + (1/24)*part4*(float(x1)**4-x[j]**4)
-                    integrsmall.append(G)
-                    break
-                #Integrated function of x wrt x thrice
-            elif choice == 5:
-                if float(x1)>=x[j+1]:
-                    G = (1/24)*part1*(x[j+1]**4-x[j]**4) + (1/120)*part2*(x[j+1]**5-x[j]**5) +\
-                    (1/24)*part3*(x[j+1]**4-x[j]**4) + (1/120)*part4*(x[j+1]**5-x[j]**5)
-                    integrsmall.append(G)
-                else:
-                    G = (1/24)*part1*(float(x1)**4-x[j]**4) + (1/120)*part2*(float(x1)**5-x[j]**5)+\
-                    (1/24)*part3*(float(x1)**4-x[j]**4) + (1/120)*part4*(float(x1)**5-x[j]**5)
-                    integrsmall.append(G)
-                    break
-                #Integrated function of x wrt x four times
-            else: 
-                print("That is not a valid choice")
-                print("Too bad, try again")
+            G = part1 + float(x1)*part2 + part3 + float(x1)*part4
+            integrsmall1.append(G)
+            #Integrated function of aerodynamic loading, wrt z to get f(x)               
+
+            if float(x1)>=x[j+1]:
+                G = part1*(x[j+1]-x[j]) + 0.5*part2*(x[j+1]**2-x[j]**2) +\
+                part3*(x[j+1]-x[j]) + 0.5*part4*(x[j+1]**2-x[j]**2) + C1 - C1
+                C1 = G
+                integrsmall2.append(G)
+            else:
+                G = part1*(float(x1)-x[j]) + 0.5*part2*(float(x1)**2-x[j]**2) +\
+                part3*(float(x1)-x[j]) + 0.5*part4*(float(x1)**2-x[j]**2) + C1 - C1
+                integrsmall2.append(G)
+                C1 = G
                 break
+            #Integrated function of x wrt x
+
+            if float(x1)>=x[j+1]:
+                G = 0.5*part1*(x[j+1]**2-x[j]**2) + (1/6)*part2*(x[j+1]**3-x[j]**3) +\
+                0.5*part3*(x[j+1]**2-x[j]**2) + (1/6)*part4*(x[j+1]**3-x[j]**3) +\
+                C1*(x[j+1]-x[j]) + C2 - C2
+                C2 = G
+                integrsmall3.append(G)
+            else:
+                G = 0.5*part1*(float(x1)**2-x[j]**2) + (1/6)*part2*(float(x1)**3-x[j]**3) +\
+                0.5*part3*(float(x1)**2-x[j]**2) + (1/6)*part4*(float(x1)**3-x[j]**3) +\
+                C1*(float(x1)-x[j]) + C2 - C2
+                C2 = G
+                integrsmall3.append(G)
+                break
+            #Integrated function of x wrt x twice
+
+            if float(x1)>=x[j+1]:
+                G = (1/6)*part1*(x[j+1]**3-x[j]**3) + (1/24)*part2*(x[j+1]**4-x[j]**4) +\
+                (1/6)*part3*(x[j+1]**3-x[j]**3) + (1/24)*part4*(x[j+1]**4-x[j]**4) +\
+                0.5*C1*(x[j+1]**2-x[j]**2) + C2*(x[j+1]-x[j]) + C3 - C3
+                C3 = G
+                integrsmall4.append(G)
+            else:
+                G = (1/6)*part1*(float(x1)**3-x[j]**3) + (1/24)*part2*(float(x1)**4-x[j]**4) +\
+                (1/6)*part3*(float(x1)**3-x[j]**3) + (1/24)*part4*(float(x1)**4-x[j]**4) +\
+                0.5*C1*(float(x1)**2-x[j]**2) + C2*(float(x1)-x[j]) + C3 - C3
+                C3 = G
+                integrsmall4.append(G)
+                break
+            #Integrated function of x wrt x thrice
+
+            if float(x1)>=x[j+1]:
+                G = (1/24)*part1*(x[j+1]**4-x[j]**4) + (1/120)*part2*(x[j+1]**5-x[j]**5) +\
+                (1/24)*part3*(x[j+1]**4-x[j]**4) + (1/120)*part4*(x[j+1]**5-x[j]**5) +\
+                (1/6)*C1*(x[j+1]**3-x[j]**3) + 0.5*C2*(x[j+1]**2-x[j]**2) + C3*(x[j+1]-x[j]) + C4-C4
+                C4 = G
+                integrsmall5.append(G)
+            else:
+                G = (1/24)*part1*(float(x1)**4-x[j]**4) + (1/120)*part2*(float(x1)**5-x[j]**5)+\
+                (1/24)*part3*(float(x1)**4-x[j]**4) + (1/120)*part4*(float(x1)**5-x[j]**5) +\
+                (1/6)*C1*(float(x1)**3-x[j]**3) + 0.5*C2*(float(x1)**2-x[j]**2) + C3(float(x1)-x[j]) + C4-C4
+                C4 = G
+                integrsmall5.append(G)
+                break
+            #Integrated function of x wrt x four times
+            
             if dothing == True:
                 dothing = False
-        integrsmall = np.array(integrsmall)
+        integrsmall1 = np.array(integrsmall1)
+        integrsmall2 = np.array(integrsmall2)
+        integrsmall3 = np.array(integrsmall3)
+        integrsmall4 = np.array(integrsmall4)
+        integrsmall5 = np.array(integrsmall5)
         integrcgz = np.array(integrcgz)
         
         resultants_z_per_square = integrcgz
         
-        integrsmall = np.sum(integrsmall) 
+        integrsmall1 = np.sum(integrsmall1) 
+        integrsmall2 = np.sum(integrsmall2) 
+        integrsmall3 = np.sum(integrsmall3) 
+        integrsmall4 = np.sum(integrsmall4) 
+        integrsmall5 = np.sum(integrsmall5) 
         #summing the parts in the z direction to gain the force in x
         
-        integr.append(integrsmall)
-    integr = np.array(integr, dtype = 'f8') #array containing integrated functions to get g(x)
-    return integr, resultants_z_per_square
+        integr1.append(integrsmall1)
+        integr2.append(integrsmall2)
+        integr3.append(integrsmall3)
+        integr4.append(integrsmall4)
+        integr5.append(integrsmall5)
+    integr1 = np.array(integr1, dtype = 'f8') #array containing integrated functions to get g(x)
+    integr2 = np.array(integr2, dtype = 'f8')
+    integr3 = np.array(integr3, dtype = 'f8')
+    integr4 = np.array(integr4, dtype = 'f8')
+    integr5 = np.array(integr5, dtype = 'f8')
+    return integr1, integr2, integr3, integr4, integr5, resultants_z_per_square
 
 
 #%% Test cases: 
@@ -290,7 +326,7 @@ This is also the outcome of our model with the test case"""
 #print()
 
 #value = input('value of x: ')
-value = 1.608
+value = 1.611
 choice = 2      #set to one if you want the location of Fres
 coeffs = coefficients(data, x, z)
 
@@ -303,8 +339,8 @@ for i in range(len(x)-1):
         #determining in which part of the aileron we are and which g(x) to use
         
     else:
-        t, resultants_z_per_square = g(value, coeffs, choice, x, z)
-        finalg = t[i]
+        s, t, u, v, w, resultants_z_per_square = g(value, coeffs, choice, x, z)
+        finalg = s[i]
         finallist.append(finalg)
         if choice ==1:
             print("Final integrated value = ", finalg)  
@@ -325,8 +361,18 @@ for j in range(len(x)-1):
     
 """For the interation of forces """ 
 #if choice >1:
-final = g(value, coeffs, choice, x, z)   #edit 3rd input to change number of integrations
-print("Integrated value: ", np.sum(final[0]))
+final = g(value, coeffs, choice, x, z) #edit 3rd input to change number of integrations
+if choice ==2:
+    print("Integrated value: ", np.sum(final[1]))
+if choice ==3:
+    print("Integrated value: ", np.sum(final[2]))
+if choice ==4:
+    print("Integrated value: ", np.sum(final[3]))
+if choice ==5:
+    print("Integrated value: ", np.sum(final[4]))
+
+#rick = final[0]
+#print("Integrated value: ", rick[-1])
 
 """Locations of Fres"""
    
@@ -334,7 +380,7 @@ if choice ==1:
     zloc_resultantforce_perx = sum(cglistz*resultants_z_per_square)/sum(resultants_z_per_square)
     print("z location resultant force is: ", zloc_resultantforce_perx)
 if choice >1:
-    xloc_resultantforce = sum(cglistx*final[0])/sum(final[0])
+    xloc_resultantforce = sum(cglistx*final[1])/sum(final[1])
     print("x location Fres full aileron is:", xloc_resultantforce) #for full aileron set x>=1.611
 
 
