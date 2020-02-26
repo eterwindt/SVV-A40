@@ -39,9 +39,7 @@ def load_data(filename, Ca, la):
     Nx = len(q[0])
     Nz = len(q)
     
-#    theta_z = []
     zmin       = []
-#    theta_x = []
     x       = []
     for i in range(1,Nz+1):
         theta_z_i = (i-1)*pi/Nz
@@ -136,7 +134,7 @@ def print_menu():
 
 
 def g(x1, coefarray, choice, x, z):
-     '''
+    '''
     :param x1: location at aileron at which or to where to integrate
     :coefarray: The coefficients obtained for interpolation
     :choice: How many times to integrate (see menu for options)
@@ -144,8 +142,8 @@ def g(x1, coefarray, choice, x, z):
     :param z: list of z coords
     :return: value integration, resultant force per square
     '''
+    """Interpolation"""
     integr = []
-    
     for j in range(len(x)-1):
         dothing = True
         integrsmall = []
